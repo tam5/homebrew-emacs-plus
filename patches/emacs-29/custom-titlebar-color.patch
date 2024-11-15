@@ -1,0 +1,89 @@
+diff --git a/lisp/frame.el b/lisp/frame.el
+index 1b5aa8cff08..87102ccfd2e 100644
+--- a/lisp/frame.el
++++ b/lisp/frame.el
+@@ -1604,6 +1604,24 @@ To get the frame's current background color, use `frame-parameters'."
+ 				     (assq 'foreground-color
+ 					   (frame-parameters))))))
+ 
++(defun set-titlebar-color (color-name)
++  "Set the titlebar color of the selected frame to COLOR-NAME.
++When called interactively, prompt for the name of the color to use.
++To get the frame's current background color, use `frame-parameters'."
++  (interactive (list (read-color "Titlebar color: ")))
++  (modify-frame-parameters (selected-frame)
++			   (list (cons 'background-color color-name)))
++  (or window-system
++      (face-set-after-frame-default (selected-frame)
++				    (list
++				     (cons 'background-color color-name)
++				     ;; Pass the foreground-color as
++				     ;; well, if defined, to avoid
++				     ;; losing it when faces are reset
++				     ;; to their defaults.
++				     (assq 'foreground-color
++					   (frame-parameters))))))
++
+ (defun set-foreground-color (color-name)
+   "Set the foreground color of the selected frame to COLOR-NAME.
+ When called interactively, prompt for the name of the color to use.
+diff --git a/src/nsfns.m b/src/nsfns.m
+index 3c012ca8f05..a49c9c2de5d 100644
+--- a/src/nsfns.m
++++ b/src/nsfns.m
+@@ -345,6 +345,47 @@ Turn the input menu (an NSMenu) into a lisp list for tracking on lisp side.
+ }
+ 
+ 
++static void
++ns_set_titlebar_color (struct frame *f, Lisp_Object arg, Lisp_Object oldval)
++{
++  NSColor *col;
++  NSView *view = FRAME_NS_VIEW (f);
++  EmacsCGFloat alpha;
++
++  block_input ();
++  if (ns_lisp_to_color (arg, &col))
++    {
++      store_frame_param (f, Qbackground_color, oldval);
++      unblock_input ();
++      error ("Unknown color");
++    }
++
++  [col retain];
++  [f->output_data.ns->background_color release];
++  f->output_data.ns->background_color = col;
++
++  FRAME_BACKGROUND_PIXEL (f) = [col unsignedLong];
++  alpha = [col alphaComponent];
++
++  if (view != nil)
++    {
++      [[view window] setBackgroundColor: col];
++
++      if (alpha != (EmacsCGFloat) 1.0)
++          [[view window] setOpaque: NO];
++      else
++          [[view window] setOpaque: YES];
++
++      if (FRAME_VISIBLE_P (f))
++        {
++          SET_FRAME_GARBAGED (f);
++          ns_clear_frame (f);
++        }
++    }
++  unblock_input ();
++}
++
++
+ static void
+ ns_set_cursor_color (struct frame *f, Lisp_Object arg, Lisp_Object oldval)
+ {
+@@ -1064,6 +1105,7 @@ Turn the input menu (an NSMenu) into a lisp list for tracking on lisp side.
+   gui_set_autoraise, /* generic OK */
+   gui_set_autolower, /* generic OK */
+   ns_set_background_color,
++  ns_set_titlebar_color,
+   0, /* x_set_border_color,  may be impossible under Nextstep */
+   0, /* x_set_border_width,  may be impossible under Nextstep */
+   ns_set_cursor_color,
