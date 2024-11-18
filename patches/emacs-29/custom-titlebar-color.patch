@@ -1,0 +1,13 @@
+diff --git a/src/nsfns.m b/src/nsfns.m
+index 3c012ca8f05..597e99dabd5 100644
+--- a/src/nsfns.m
++++ b/src/nsfns.m
+@@ -332,7 +332,7 @@ Turn the input menu (an NSMenu) into a lisp list for tracking on lisp side.
+           face->background = [[col colorWithAlphaComponent: alpha]
+                                unsignedLong];
+ 
+-          update_face_from_frame_parameter (f, Qbackground_color, arg);
++          // update_face_from_frame_parameter (f, Qbackground_color, arg);
+         }
+ 
+       if (FRAME_VISIBLE_P (f))
