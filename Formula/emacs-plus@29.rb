@@ -94,6 +94,7 @@ class EmacsPlusAT29 < EmacsBase
   local_patch "fix-window-role", sha: "1f8423ea7e6e66c9ac6dd8e37b119972daa1264de00172a24a79a710efcb8130"
   local_patch "system-appearance", sha: "d6ee159839b38b6af539d7b9bdff231263e451c1fd42eec0d125318c9db8cd92"
   local_patch "round-undecorated-frame", sha: "7451f80f559840e54e6a052e55d1100778abc55f98f1d0c038a24e25773f2874"
+  local_patch "custom-titlebar-color", sha: "9fda3f1b1f61e72994345f8c393f723a02763a8db5968e7fb065963e3369e2ac"
 
   #
   # Install
